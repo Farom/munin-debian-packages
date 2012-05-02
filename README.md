@@ -6,15 +6,27 @@ munin-debian-packages
 With this plugin munin can give you a nice graph and some details where your
 packages come from, how old or new your installation is. Furtermore it tells
 you how many updates you should have been installed, how many packages are
-outdated and where they come from. If you sort by 
+outdated and where they come from.
+
+![A week of upgradable packages](/examples/packages_label_archive_upgradable-week.png)
 
 You can sort installed or upgradable Packages by 'archive', 'origin', 'site',
-'label' and 'component' and even some of them in a row
+'label' and 'component' and even some of them at once.
 
+The script uses caching cause it is quite expensive. It saves the output to a
+cachefile and checks on each run, if dpkg-status or downloaded Packagefile have
+changed. If one of them has changed, it runs, if not it gives you the cached
+version.
 
 ### Installation
+
+This plugin has checked on Debian - Wheezy and squeeze. If you want to use it
+on older installations, tell me whether it works or which errors you had. It
+shoud run past python-apt 0.7 and python 2.5.
+
 check out this git repository from 
-    
+   
+    aptitude install python-apt
     git clone git://github.com/Farom/munin-debian-packages.git
     cd munin-debian-packages
     sudo cp deb_packages.py /etc/munin/plugins
