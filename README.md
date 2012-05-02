@@ -8,7 +8,7 @@ packages come from, how old or new your installation is. Furtermore it tells
 you how many updates you should have been installed, how many packages are
 outdated and where they come from.
 
-![A week of upgradable packages](/examples/packages_label_archive_upgradable-week.png)
+![A week of upgradable packages](./examples/packages_label_archive_upgradable-week.png)
 
 You can sort installed or upgradable Packages by 'archive', 'origin', 'site',
 'label' and 'component' and even some of them at once.
