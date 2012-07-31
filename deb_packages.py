@@ -24,6 +24,8 @@ TODO: update only if system was updated (aptitutde update has been run)
 TODO: shorten ext_info with getShortestConfigOfOptions 
 TODO: check whether cachefile matches the config 
       • i have no clever idea to do this without 100 lines of code
+      • $plugin config is executed every time … so no need of doing this
+TODO: make config cached
 BUG: If a package will be upgraded, and brings in new dependancies, 
      these new deps will not be counted. WONTFIX
 """
@@ -38,6 +40,7 @@ import string
 import re
 from collections  import defaultdict, namedtuple
 from types import StringTypes, TupleType, DictType, ListType, BooleanType
+from subprocess import PIPE, Popen, CalledProcessError
 
 class EnvironmentConfigBroken(Exception): pass
 
@@ -71,7 +74,7 @@ CACHE_FILE = os.path.join(STATE_DIR, "deb_packages.state")
 """ 
    There is no need to execute this script every 5 minutes.
    The Results are put to this file, next munin-run can read from it
-   CACHE_FILE is usually /var/lib/munin/plugin-state/debian_packages.state
+   CACHE_FILE is usually /var/lib/munin/plugin-state/deb_packages.state
 """
 
 CACHE_FILE_MAX_AGE = getEnv('CACHE_FILE_MAX_AGE', default=3540, cast=int)
@@ -182,6 +185,14 @@ apt = Apt()
 
     initialisation is lazy 
 """
+
+def weight(packageFile):
+    """ calculates a weight of all parameters of a packagefile """
+    val = 0
+    for option in PackageStat.viewSet:
+        detail = packageFile.__getattribute__(option)
+        val += PackageStat.multiplierDict[option] * PackageStat.sortDict[option][detail]
+    return val
 
 def weightOfPackageFile(detail_tuple, option_tuple):
     """
@@ -400,7 +411,7 @@ class PackageStat(defaultdict):
     sortDict = { 'label': defaultdict(   lambda :  20, 
                                        {'Debian':  90, 
                                         ''      :  1,
-                                        'Debian Security' : 90,
+                                        'Debian-Security' : 89.9999, # it should be a bit lower than Debian-stable
                                         'Debian Backports': 90}),
                  'archive': defaultdict( lambda :  5,
                                 { 'now':                0, 
@@ -445,6 +456,7 @@ class PackageStat(defaultdict):
     """
         Dict that stores multipliers 
         to compile a sorting value for each archivefile
+        pay attention if you change values here, it affects floats in sortDict!!!
     """
 
     def weight(self, detail_tuple):
@@ -488,7 +500,8 @@ class PackageStat(defaultdict):
     def configD(cls, key, value):
         i = { 'rrdName': cls.generate_rrd_name_from(key),
               'options': string.join(key,'/'),
-              'info'   : "from %r" % value.asLine() }
+              'info'   : "from %r" % value.asLine(),
+            }
         return i
 
     def configHead(self):
@@ -509,9 +522,15 @@ class PackageStat(defaultdict):
             if not self.packetHandler.includeNow and self.optionIsDpkgStatus(details=options):
                  continue
             i = self.configD(options, item)
+            i['warnLevel'] = getEnv(self.packetHandler.type+'_warning')
+            i['criticalLevel'] = getEnv(self.packetHandler.type+'_critical')
             print "{rrdName}.label {options}".format(**i)
             print "{rrdName}.info {info}".format(**i)
             print "{rrdName}.draw AREASTACK".format(**i)
+            if i['warnLevel'] is not None:
+                print "{rrdName}.warning {warnLevel}".format(**i)
+            if i['criticalLevel'] is not None:
+                print "{rrdName}.critical {criticalLevel}".format(**i)
 
     def optionIsDpkgStatus(self, details, options=None):
         """ 
@@ -760,7 +779,18 @@ class Munin(object):
             stat.printConfig()
 
     def autoconf(self):
-        print 'yes'
+        try:
+            p = Popen(["/usr/bin/lsb_release", "-is"], stderr=PIPE, stdout=PIPE)
+            out,err = p.communicate()
+        except:
+            print 'no'
+        # use this regex, if this module works with other 
+        regex = re.compile(r"Debian")
+        m = re.match(regex, out)
+        if m:
+            print 'yes'
+        else:
+            print 'no'
 
     def _argParser(self):
         parser = argparse.ArgumentParser(description="Show some statistics "\
