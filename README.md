@@ -44,12 +44,6 @@ A typical configuration looks like this
     # Packagelists to this size are printed as extra information to munin.extinfo
     env.MAX_LIST_SIZE_EXT_INFO 50
 
-    # Age in seconds an $CACHE_FILE can be. If it is older, the script updates
-    # default if not set is 3540 (one hour)
-    # at the moment this is not used, the plugin always runs (if munin calls it)
-    #  
-    env.CACHE_FILE_MAX_AGE 3540
-
     # All these numbers are only for sorting, so you can use env.graph01_sort_by_0
     # and env.graph01_sort_by_2 without using env.graph01_sort_by_1.
     # sort_by values ...
