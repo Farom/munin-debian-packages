@@ -10,8 +10,15 @@ env.MAX_LIST_SIZE_EXT_INFO 50
 # default if not set is 3540 (one hour)
 env.CACHE_FILE_MAX_AGE 3540
 
+# warning and critical values for upgradable packages
+env.upgradable_warning 1 
+env.upgradable_critical 10 
+
+# All these numbers are only for sorting, so you can use env.graph01_sort_by_0
+# and env.graph01_sort_by_ 2 without using env.graph01_sort_by_1.
 # sort_by values ...
 # possible values are 'label', 'archive', 'origin', 'site', FIXME
+
 env.graph00_type installed
 env.graph00_sort_by_0 label
 env.graph00_sort_by_1 archive
