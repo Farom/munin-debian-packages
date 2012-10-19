@@ -255,76 +255,75 @@ class TreeTwig(defaultdict):
         return values.strip(' ,')
 
 
-def getShortestConfigOfOptions(optionList = ['label', 'archive', 'site']):
-    """ 
-        tries to find the order to print a tree of the optionList
-        with the local repositories with the shortest line 
-        possible options are:
-          'component'
-          'label'
-          'site'
-          'archive'
-          'origin' 
-          'architecture' 
-        Architecture values are usually the same and can be ignored.
-
-        tells you wich representation of a tree as line is shortest.
-        Is needed to say which ext.info line would be the shortest
-        to write the shortest readable output.
-    """
-    l = optionList # just because l is much shorter
+#def getShortestConfigOfOptions(optionList = ['label', 'archive', 'site']):
+#    """ 
+#        tries to find the order to print a tree of the optionList
+#        with the local repositories with the shortest line 
+#        possible options are:
+#          'component'
+#          'label'
+#          'site'
+#          'archive'
+#          'origin' 
+#          'architecture' 
+#        Architecture values are usually the same and can be ignored,
+#        unless you you multiarch
+#
+#        tells you wich representation of a tree as line is shortest.
+#        Is needed to say which ext.info line would be the shortest
+#        to write the shortest readable output.
+#    """
+#    # creating possible iterations
+#    fieldCount = len(optionList)
+#    if fieldCount == 1:
+#        selection = optionList
+#    elif fieldCount == 2:
+#        selection = [(x,y) 
+#                     for x in optionList 
+#                     for y in optionList if x!=y ]
+#    elif fieldCount == 3:
+#        selection = [(x,y,z) 
+#                     for x in optionList 
+#                     for y in optionList if x!=y 
+#                     for z in optionList if z!=y and z!=x]
+#    else:
+#        raise Exception("NotImplemented for size %s" % fieldCount)
+#
+#    # creating OptionsTree, and measuring the length of it on a line
+#    # for every iteration
+#    d = {}
+#    for keys in selection:
+#        d[keys] = len( getOptionsTree(apt.cache, keys).asLine() )
+#
+#    # finding the shortest variant
+#    r = min( d.items(), key=lambda x: x[1] )
+#
+#    return list(r[0]), r[1]
     
-    # creating possible iterations
-    fieldCount = len(optionList)
-    if fieldCount == 1:
-        selection = l
-    elif fieldCount == 2:
-        selection = [(x,y) 
-                     for x in l 
-                     for y in l if x!=y ]
-    elif fieldCount == 3:
-        selection = [(x,y,z) 
-                     for x in l 
-                     for y in l if x!=y 
-                     for z in l if z!=y and z!=x]
-    else:
-        raise Exception("NotImplemented for size %s" % fieldCount)
-
-    # creating OptionsTree, and measuring the length of it on a line
-    # for every iteration
-    d = {}
-    for keys in selection:
-        d[keys] = len( getOptionsTree(apt.cache, keys).asLine() )
-
-    # finding the shortest variant
-    r = min( d.items(), key=lambda x: x[1] )
-
-    return list(r[0]), r[1]
-    
-def getOptionsTree(cache, keys=None):
-    """
-    t = getOptionsTree(cache, ['archive', 'site', 'label'])
-    generates ad dict of dict of sets like:
-    ...
-    it tells you:
-    ...
-    """
-    t = Tree()
-    for f in cache.file_list:
-        # ignoring translation indexes ...
-        if f.index_type != 'Debian Package Index' and f.index_type !='Debian dpkg status file':
-            continue
-        # ignoring files with 0 size
-        if f.size == 0L:
-            continue
-        # creating default dict in case of secondary_options are empty
-        d = t
-        for key in keys:
-            if not key:
-                print f
-            dKey = f.__getattribute__(key)
-            d = d[dKey]
-    return t
+#def getOptionsTree(cache, keys=None):
+#    """
+#    t = getOptionsTree(cache, ['archive', 'site', 'label'])
+#    generates ad dict of dict of sets like:
+#    ...
+#    it tells you:
+#    ...
+#    """
+#    t = Tree()
+#    for f in cache.file_list:
+#        # ignoring translation indexes ...
+#        if f.index_type != 'Debian Package Index' and f.index_type !='Debian dpkg status file':
+#            continue
+#        # ignoring files with 0 size
+#        if f.size == 0L:
+#            continue
+#        # creating default dict in case of secondary_options are empty
+#        d = t
+#        for key in keys:
+#            if not key:
+#                print f
+#            dKey = f.__getattribute__(key)
+#            d = d[dKey]
+#    return t
 
 def createKey(key, file):
     """
